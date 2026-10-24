@@ -1,0 +1,50 @@
+RunSpoof - 校园跑定位与步态模拟
+Copyright (C) 2026  RunSpoof contributors
+
+本程序是自由软件：你可以依据自由软件基金会发布的 GNU 通用公共许可证
+（第 3 版或你选择的任何更新版本）的条款重新分发和/或修改它。
+
+本程序分发时希望它有用，但不提供任何担保；甚至不提供适销性或特定用途
+适用性的默示担保。详见 GNU 通用公共许可证。
+
+你应该已经随本程序收到 GNU 通用公共许可证的副本。若没有，见
+<https://www.gnu.org/licenses/>。
+
+================================================================
+上游归属声明 / Upstream Attribution
+================================================================
+
+本项目在实现上参考了以下项目，并依其许可证要求作出声明：
+
+  LocationSpoofer
+  https://github.com/SuseOAA/LocationSpoofer
+  Copyright (C) 2026 SuseOAA
+  License: GNU General Public License v3.0
+
+具体参考的部分：
+
+  1. hook 框架的整体组织方式（按 AMap / LocationManager / GNSS /
+     传感器 / WiFi / 基站 / 反作弊 分层挂载）。
+  2. 通过反射构造 SensorEvent 实例后主动回调 onSensorChanged 的技巧，
+     用于绕开对 SystemSensorManager 内部派发通道的 hook。
+  3. 使用 GnssStatus.Builder 合成卫星状态对象、再以新对象重放原方法的做法，
+     避免直接修改链上的不可变参数。
+
+本项目的全部源代码同样以 GNU General Public License v3.0 发布，
+许可证全文见同目录 LICENSE 文件。
+
+================================================================
+第三方组件 / Third-party components
+================================================================
+
+本仓库不打包、不内嵌任何第三方二进制：
+
+  - 不含 LocationSpoofer 的 APK 或源码副本
+  - 不含 LSPosed 的 daemon APK / manager APK / native 库
+  - 不含任何签名密钥（keystore / jks / p12）
+
+构建时需要自行准备的依赖（见 README 的「构建」一节）：
+
+  - JDK 17
+  - Android SDK (build-tools 34.0.0, platforms;android-34)
+  - libxposed API 102 的 classes.jar

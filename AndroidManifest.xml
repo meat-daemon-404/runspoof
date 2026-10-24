@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.qf.runspoof">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:label="RunSpoof"
+        android:usesCleartextTraffic="true">
+
+        <!-- 地图选点界面：点图标即可打开 -->
+        <activity
+            android:name=".MapPickerActivity"
+            android:exported="true"
+            android:label="RunSpoof 路线"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+    <!-- libxposed API 102；模块身份由 META-INF/xposed/{module,scope,java_init} 声明 -->
+    <meta-data android:name="xposedmodule" android:value="true" />
+    <meta-data android:name="xposeddescription" android:value="RunSpoof: campus-run location/step simulation" />
+    <meta-data android:name="xposedminversion" android:value="101" />
+    <meta-data android:name="xposedsharedprefs" android:value="true" />
+</manifest>

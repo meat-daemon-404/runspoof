@@ -1,0 +1,38 @@
+# ── 构建产物 ──────────────────────────────
+build/
+dist/
+out/
+*.apk
+*.ap_
+*.dex
+*.class
+*.jar
+
+# ── 签名密钥：绝不入库 ────────────────────
+*.jks
+*.keystore
+*.p12
+*.pfx
+ks.jks
+release-store.p12
+debug-keystore.p12
+
+# ── 本地环境 ──────────────────────────────
+local.properties
+.idea/
+.gradle/
+*.iml
+.vscode/
+
+# ── IDE / OS ──────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── 临时与日志 ────────────────────────────
+*.log
+*.tmp
+*.bak
+*.orig
+_tools/
+shots/

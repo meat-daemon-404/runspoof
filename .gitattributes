@@ -1,0 +1,21 @@
+# 统一按 LF 检出。
+#
+# 为什么需要这一条：Windows 版 Git 的 system 级配置常常是 core.autocrlf=true，
+# 于是 clone 出来的文本文件会被改写成 CRLF。这会让 assets/META-INF/xposed/module.prop
+# 这类需要逐字节稳定的元数据文件内容发生变化（59 B vs 57 B），
+# 而 LSPosed 对模块声明的解析路径没有在 CRLF 下验证过。
+# 显式钉死 eol=lf，任何人 clone 下来拿到的都是同一份字节。
+* text=auto eol=lf
+
+# 二进制：不做任何换行/编码转换
+*.apk  binary
+*.dex  binary
+*.jar  binary
+*.jks  binary
+*.p12  binary
+*.png  binary
+*.idsig binary
+
+# Windows 批处理必须是 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
