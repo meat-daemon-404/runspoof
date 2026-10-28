@@ -950,20 +950,19 @@ public class RunSpoofModule extends XposedModule {
      */
     private static double vsAltMin = Double.MAX_VALUE, vsAltMax = -Double.MAX_VALUE;
     private static double vsAccMin = Double.MAX_VALUE, vsAccMax = -Double.MAX_VALUE;
-    private static double vsRateMin = Double.MAX_VALUE, vsRateMax = -Double.MAX_VALUE;
+    /** 上一分钟的 stepsFloat 采样（用于量实际发出的步频）。-1 = 还没有基线。 */
+    private static double vsStepRef = -1;
+    private static long vsStepRefT = -1;
 
     /** 每个派发 tick 调一次，累积本分钟内的取极值。 */
     private static synchronized void accumulateVitals(long t) {
         try {
             double alt = RouteEngine.currentAltitude(t);
             double acc = RouteEngine.currentHorizontalAccuracy(t);
-            double rate = RouteEngine.currentStepRate(t) * 60.0;   // spm
             if (alt < vsAltMin) vsAltMin = alt;
             if (alt > vsAltMax) vsAltMax = alt;
             if (acc < vsAccMin) vsAccMin = acc;
             if (acc > vsAccMax) vsAccMax = acc;
-            if (rate < vsRateMin) vsRateMin = rate;
-            if (rate > vsRateMax) vsRateMax = rate;
         } catch (Throwable ignored) {
         }
     }
@@ -972,17 +971,34 @@ public class RunSpoofModule extends XposedModule {
         try {
             if (vsAltMin == Double.MAX_VALUE) return;    // 本分钟没采到样
             double altRel = RouteEngine.currentAltitudeRelative(t);
-            double cad = RouteEngine.currentCadence(t);
+            // ★ 自检必须量「实际发出去的东西」，不能量「另一套公式」。
+            //   两个计步通道的真实来源都是 RouteEngine.stepsFloat()：
+            //     STEP_COUNTER = floor(steps)        —— 累计值
+            //     STEP_DETECTOR = floor(steps) 的增量 —— 逐事件
+            //   所以两者的步频恒等是构造保证，无需再比。
+            //   旧版这里比的是 currentStepRate()（steps 的解析导数）与
+            //   currentCadence()（另一套独立公式），二者在疲劳段本就不同源，
+            //   报出的百分比差异是**指标错**，不是通道不一致。
+            //   现在改为量 stepsFloat 的实际增量率，与派发同源。
+            double stepsNow = RouteEngine.stepsFloat(t);
+            double rateSpm;
+            if (vsStepRefT < 0 || stepsNow < vsStepRef) {
+                // 首分钟，或热重载导致时间轴重置（步数倒退）→ 重新取基线
+                vsStepRefT = t; vsStepRef = stepsNow; rateSpm = -1;
+            } else {
+                double dt = (t - vsStepRefT) / 1000.0;
+                rateSpm = dt > 0.5 ? (stepsNow - vsStepRef) / dt * 60.0 : -1;
+                vsStepRefT = t; vsStepRef = stepsNow;
+            }
             boolean ok = (vsAltMax - vsAltMin) > 1e-6 && (vsAccMax - vsAccMin) > 1e-6;
             android.util.Log.i(TAG, String.format(java.util.Locale.US,
                     "VITALS alt=%.2f/%.2f span=%.3f rel=%+.2f acc=%.2f/%.2f "
-                            + "stepRate=%.1f/%.1f cadence=%.1f -> %s",
+                            + "emitSteps=%.0f emitSpm=%.1f -> %s",
                     vsAltMin, vsAltMax, vsAltMax - vsAltMin, altRel,
-                    vsAccMin, vsAccMax, vsRateMin, vsRateMax, cad,
+                    vsAccMin, vsAccMax, stepsNow, rateSpm,
                     ok ? "VARIES" : "CONSTANT!"));
             vsAltMin = Double.MAX_VALUE; vsAltMax = -Double.MAX_VALUE;
             vsAccMin = Double.MAX_VALUE; vsAccMax = -Double.MAX_VALUE;
-            vsRateMin = Double.MAX_VALUE; vsRateMax = -Double.MAX_VALUE;
         } catch (Throwable ignored) {
         }
     }
