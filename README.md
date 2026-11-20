@@ -42,7 +42,7 @@
 
 **完整手把手流程见 [docs/06-完整使用教程](docs/06-完整使用教程.md)**，这里只是最短路径。
 
-1. 从 [Releases](https://github.com/sun-zihang/runspoof/releases) 下载 `RunSpoof-v*.apk`，安装
+1. 从 [Releases](https://github.com/meat-daemon-404/runspoof/releases) 下载 `RunSpoof-v*.apk`，安装
 2. LSPosed 管理器 → 模块 → 启用 **RunSpoof**
 3. **作用域只勾选目标 App**（`com.zjwh.android_wh_physicalfitness`）
 4. ★ **建配置文件**（不做这步后面全白费）：
